@@ -2,9 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { collection, onSnapshot, updateDoc, doc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { format } from 'date-fns';
+import { Modal } from '../Modal';
 
 export const AdminDashboard = () => {
   const [orders, setOrders] = useState<any[]>([]);
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'orders'), (snapshot) => {
@@ -27,6 +30,11 @@ export const AdminDashboard = () => {
       console.error('Error updating order:', error);
       alert('Erreur lors de la mise à jour du statut');
     }
+  };
+
+  const handleOrderClick = (order: any) => {
+    setSelectedOrder(order);
+    setIsModalOpen(true);
   };
 
   return (
@@ -62,8 +70,13 @@ export const AdminDashboard = () => {
                       {orders.map((order) => (
                         <tr key={order.id}>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-medium text-gray-900">{order.name}</div>
-                            <div className="text-sm text-gray-500">{order.email}</div>
+                            <button
+                              onClick={() => handleOrderClick(order)}
+                              className="text-left hover:text-pink-600"
+                            >
+                              <div className="text-sm font-medium text-gray-900">{order.name}</div>
+                              <div className="text-sm text-gray-500">{order.email}</div>
+                            </button>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm text-gray-900">{order.cakeType}</div>
@@ -105,6 +118,23 @@ export const AdminDashboard = () => {
           </div>
         </div>
       </div>
+
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        {selectedOrder && (
+          <div>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Détails de la commande</h3>
+            <div className="space-y-3">
+              <p><strong>Client:</strong> {selectedOrder.name}</p>
+              <p><strong>Email:</strong> {selectedOrder.email}</p>
+              <p><strong>Téléphone:</strong> {selectedOrder.phone}</p>
+              <p><strong>Type de gâteau:</strong> {selectedOrder.cakeType}</p>
+              <p><strong>Taille:</strong> {selectedOrder.size} parts</p>
+              <p><strong>Message sur le gâteau:</strong> {selectedOrder.message || 'Aucun message'}</p>
+              <p><strong>Date de livraison:</strong> {format(new Date(selectedOrder.deliveryDate), 'dd/MM/yyyy')}</p>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };
