@@ -1,0 +1,110 @@
+import React, { useEffect, useState } from 'react';
+import { collection, onSnapshot, updateDoc, doc } from 'firebase/firestore';
+import { db } from '../../lib/firebase';
+import { format } from 'date-fns';
+
+export const AdminDashboard = () => {
+  const [orders, setOrders] = useState<any[]>([]);
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'orders'), (snapshot) => {
+      const ordersData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setOrders(ordersData);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    try {
+      await updateDoc(doc(db, 'orders', orderId), {
+        status: newStatus
+      });
+    } catch (error) {
+      console.error('Error updating order:', error);
+      alert('Erreur lors de la mise à jour du statut');
+    }
+  };
+
+  return (
+    <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      <div className="px-4 py-6 sm:px-0">
+        <h1 className="text-2xl font-semibold text-gray-900">Tableau de bord administrateur</h1>
+        <div className="mt-6">
+          <div className="flex flex-col">
+            <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+              <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+                <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Client
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Gâteau
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Date de livraison
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Statut
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {orders.map((order) => (
+                        <tr key={order.id}>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900">{order.name}</div>
+                            <div className="text-sm text-gray-500">{order.email}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">{order.cakeType}</div>
+                            <div className="text-sm text-gray-500">{order.size} parts</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900">
+                              {format(new Date(order.deliveryDate), 'dd/MM/yyyy')}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                              ${order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+                                order.status === 'preparing' ? 'bg-blue-100 text-blue-800' :
+                                order.status === 'ready' ? 'bg-green-100 text-green-800' :
+                                'bg-gray-100 text-gray-800'}`}>
+                              {order.status}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <select
+                              onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                              value={order.status}
+                              className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-pink-500 focus:border-pink-500 sm:text-sm"
+                            >
+                              <option value="pending">En attente</option>
+                              <option value="preparing">En préparation</option>
+                              <option value="ready">Prêt</option>
+                              <option value="delivered">Livré</option>
+                            </select>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
