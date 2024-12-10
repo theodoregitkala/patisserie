@@ -25,3 +25,12 @@ export interface Order {
   lastUpdated?: Date;
   notificationSent?: boolean;
 }
+
+
+export interface Admin {
+  id: string;         // ID de l'utilisateur
+  name: string;
+  email: string;      // Email de l'utilisateur
+  role: string;       // Rôle (par exemple, 'admin' ou 'superadmin')
+  approved: boolean;  // Si l'utilisateur est approuvé ou non
+}

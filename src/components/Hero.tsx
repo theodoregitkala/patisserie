@@ -1,4 +1,4 @@
-import { Cake } from 'lucide-react';
+// import { Cake } from 'lucide-react';
 
 export const Hero = () => {
   return (
