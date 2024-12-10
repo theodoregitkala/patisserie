@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { User } from 'firebase/auth';
 import { Hero } from './components/Hero';
@@ -9,6 +9,7 @@ import { AdminLogin } from './components/admin/AdminLogin';
 import { Navigation } from './components/Navigation';
 import { Footer } from './components/Footer';
 import { subscribeToAuthChanges } from './lib/auth';
+import { Products } from './components/Products'; // Import du composant Produits
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -32,13 +33,23 @@ function App() {
         <Navigation />
         <div className="flex-grow">
           <Routes>
-            <Route path="/" element={
-              <>
-                <Hero />
-                <FeaturedProducts />
-                <OrderForm />
-              </>
-            } />
+            {/* Page d'accueil */}
+            <Route 
+              path="/" 
+              element={
+                <>
+                  <Hero />
+                  <FeaturedProducts />
+                  <OrderForm />
+                </>
+              } 
+            />
+            {/* Page Produits */}
+            <Route 
+              path="/products" 
+              element={<Products />} 
+            />
+            {/* Pages Admin */}
             <Route 
               path="/admin/login" 
               element={user ? <Navigate to="/admin/dashboard" /> : <AdminLogin />} 
@@ -47,7 +58,10 @@ function App() {
               path="/admin/dashboard" 
               element={user ? <AdminDashboard /> : <Navigate to="/admin/login" />} 
             />
-            <Route path="/admin" element={<Navigate to="/admin/login" />} />
+            <Route 
+              path="/admin" 
+              element={<Navigate to="/admin/login" />} 
+            />
           </Routes>
         </div>
         <Footer />
