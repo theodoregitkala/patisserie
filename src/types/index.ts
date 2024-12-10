@@ -12,19 +12,16 @@ export interface Cake {
 
 export interface Order {
   id: string;
-  userId: string;
-  cakeId: string;
+  name: string;
+  email: string;
+  phone: string;
+  cakeType: string;
   size: string;
   flavor: string;
   message: string;
-  deliveryDate: Date;
+  deliveryDate: string;
   status: 'pending' | 'preparing' | 'ready' | 'delivered';
-  customerInfo: {
-    name: string;
-    email: string;
-    phone: string;
-    address?: string;
-  };
   createdAt: Date;
-  total: number;
+  lastUpdated?: Date;
+  notificationSent?: boolean;
 }

@@ -24,11 +24,11 @@ export const Footer = () => {
               </li>
               <li className="flex items-center">
                 <Mail className="h-5 w-5 text-pink-500 mr-2" />
-                <span>contact@lapatisserie.com</span>
+                <span>contact@lapatisserie.fr</span>
               </li>
               <li className="flex items-center">
                 <MapPin className="h-5 w-5 text-pink-500 mr-2" />
-                <span>Bebelstraße 22, 67549 Worms</span>
+                <span>123 Rue de la Pâtisserie, Paris</span>
               </li>
             </ul>
           </div>
@@ -42,7 +42,7 @@ export const Footer = () => {
           </div>
         </div>
         <div className="mt-8 pt-8 border-t border-gray-800 text-center text-gray-400">
-          <p>&copy; {new Date().getFullYear()} La Pâtisserie. Tous droits réservés (theo).</p>
+          <p>&copy; {new Date().getFullYear()} La Pâtisserie. Tous droits réservés.</p>
         </div>
       </div>
     </footer>

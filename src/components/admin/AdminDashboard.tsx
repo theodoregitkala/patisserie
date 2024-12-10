@@ -3,11 +3,15 @@ import { collection, onSnapshot, updateDoc, doc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { format } from 'date-fns';
 import { Modal } from '../Modal';
+import { sendNotification } from '../../lib/notifications';
+import { logoutAdmin } from '../../lib/auth';
+import { useNavigate } from 'react-router-dom';
 
 export const AdminDashboard = () => {
   const [orders, setOrders] = useState<any[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'orders'), (snapshot) => {
@@ -21,11 +25,12 @@ export const AdminDashboard = () => {
     return () => unsubscribe();
   }, []);
 
-  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+  const updateOrderStatus = async (orderId: string, newStatus: string, email: string) => {
     try {
       await updateDoc(doc(db, 'orders', orderId), {
         status: newStatus
       });
+      await sendNotification(orderId, newStatus, email);
     } catch (error) {
       console.error('Error updating order:', error);
       alert('Erreur lors de la mise à jour du statut');
@@ -37,10 +42,25 @@ export const AdminDashboard = () => {
     setIsModalOpen(true);
   };
 
+  const handleLogout = async () => {
+    const success = await logoutAdmin();
+    if (success) {
+      navigate('/admin/login');
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
       <div className="px-4 py-6 sm:px-0">
-        <h1 className="text-2xl font-semibold text-gray-900">Tableau de bord administrateur</h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-semibold text-gray-900">Tableau de bord administrateur</h1>
+          <button
+            onClick={handleLogout}
+            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+          >
+            Déconnexion
+          </button>
+        </div>
         <div className="mt-6">
           <div className="flex flex-col">
             <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
@@ -98,7 +118,7 @@ export const AdminDashboard = () => {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <select
-                              onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                              onChange={(e) => updateOrderStatus(order.id, e.target.value, order.email)}
                               value={order.status}
                               className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-pink-500 focus:border-pink-500 sm:text-sm"
                             >
